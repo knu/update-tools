@@ -9,9 +9,15 @@ It uses [asdf](https://asdf-vm.com/) to get the latest version of a specified to
 ``` yaml
 on:
   schedule:
-    - cron: '0 0 * * 1' # At 00:00 UTC on Mondays
+    - cron: "0 0 * * 1"  # At 00:00 UTC on Mondays
 
   workflow_dispatch:
+
+  push:
+    branches:
+      - main
+    paths:
+      - ".tool-versions"
 
 name: "Update Tools"
 
