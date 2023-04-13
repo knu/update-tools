@@ -1,0 +1,88 @@
+name: "Update Tools"
+
+description: |
+  Update a version of a given tool listed in .tool-version
+
+inputs:
+  tool:
+    type: string
+    required: true
+  constraint:
+    type: string
+    default: ""
+    required: false
+  labels:
+    type: string
+    default: "automerge,dependencies"
+    required: false
+  release_url:
+    type: string
+    default: ""
+    required: false
+
+outputs:
+  current_version:
+    description: The current version
+    value: ${{ steps.versions.outputs.current_version }}
+  latest_version:
+    description: The latest version found
+    value: ${{ steps.versions.outputs.latest_version }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/checkout@v3
+
+    - name: Install asdf
+      uses: asdf-vm/actions/install@v2
+
+    - id: versions
+      name: Get the current and latest versions of the tool
+      run: |
+        CURRENT_VERSION=$(asdf current "${{ inputs.tool }}" | awk '{print $2}')
+        LATEST_VERSION=$(asdf latest "${{ inputs.tool }}" "${{ inputs.constraint }}")
+
+        tee -a "$GITHUB_ENV" <<EOF
+        CURRENT_VERSION=$CURRENT_VERSION
+        LATEST_VERSION=$LATEST_VERSION
+        EOF
+
+        tee -a "$GITHUB_OUTPUT" <<EOF
+        current_version=$CURRENT_VERSION
+        latest_version=$LATEST_VERSION
+        EOF
+      shell: bash
+
+    - name: Install the latest version and update .tool-versions
+      if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      run: |
+        asdf install "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
+        asdf local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
+      shell: bash
+
+    - name:
+      if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      run: |
+        RELEASE_URL="${{ inputs.release_url }}"
+        if [ -z "$RELEASE_URL" ]; then
+          q="\"${{ inputs.tool }} ${{ env.LATEST_VERSION }}\" release"
+          RELEASE_URL="https://www.google.com/search?q=$(jq -rn --arg q "$q" '$q|@uri')"
+        fi
+        tee -a "$GITHUB_ENV" <<EOF
+        RELEASE_URL=$RELEASE_URL
+        EOF
+      shell: bash
+
+    - uses: peter-evans/create-pull-request@v5
+      if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      with:
+        add-paths: .tool-versions
+        commit-message: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
+        title: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
+        body: |
+          Updates ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}.
+
+          ${{ env.RELEASE_URL }}
+        branch: "update_tools/${{ inputs.tool }}/${{ env.LATEST_VERSION }}"
+        delete-branch: true
+        labels: "${{ inputs.labels }}"
