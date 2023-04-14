@@ -13,7 +13,7 @@ inputs:
     required: false
   labels:
     type: string
-    default: "automerge,dependencies"
+    default: "dependencies"
     required: false
   release_url:
     type: string

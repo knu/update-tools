@@ -57,7 +57,7 @@ jobs:
 
   Comma separated list of labels for a created PR.
 
-  Default: `automerge,dependencies`
+  Default: `dependencies`
 
 - `release_url` (string, optional)
 
