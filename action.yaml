@@ -60,7 +60,7 @@ runs:
         asdf local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
       shell: bash
 
-    - name:
+    - name: Prepare information for PR
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       run: |
         RELEASE_URL="${{ inputs.release_url }}"
