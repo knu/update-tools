@@ -83,6 +83,6 @@ runs:
           Updates ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}.
 
           ${{ env.RELEASE_URL }}
-        branch: "update_tools/${{ inputs.tool }}/${{ env.LATEST_VERSION }}"
+        branch: "update_tools/${{ inputs.tool }}/${{ inputs.constraint }}"
         delete-branch: true
         labels: "${{ inputs.labels }}"
