@@ -65,6 +65,12 @@ jobs:
 
   Default: A Google search URL generated from the tool name and the latest version.
 
+- `token` (string, optional)
+
+  GitHub access token to use for calling GitHub APIs and creating a PR.
+
+  Default: `${{ github.token }}`
+
 ## Outputs
 
 - `current_version`

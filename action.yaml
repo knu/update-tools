@@ -19,6 +19,10 @@ inputs:
     type: string
     default: ""
     required: false
+  token:
+    type: string
+    required: false
+    default: "${{ github.token }}"
 
 outputs:
   current_version:
@@ -76,6 +80,7 @@ runs:
     - uses: peter-evans/create-pull-request@v5
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       with:
+        token: "${{ inputs.token }}"
         add-paths: .tool-versions
         commit-message: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
         title: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
