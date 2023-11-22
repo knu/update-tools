@@ -2,7 +2,7 @@
 
 This Action updates a tool version listed in `.tool-versions` at the top level of the target repository, one at a time.
 
-It uses [asdf](https://asdf-vm.com/) to get the latest version of a specified tool, so it depends on the asdf plugin how fast the latest releases are found and available.  For example, [the ruby plugin](https://github.com/asdf-vm/asdf-ruby) requires ruby-build to be updated before it can install a new release of Ruby.
+It uses [rtx](https://github.com/jdx/rtx) to get the latest version of a specified tool.
 
 ## Usage
 
@@ -45,13 +45,13 @@ jobs:
 
 - `tool` (string, required)
 
-  Name of the asdf plugin.  e.g. `golang`, `ruby`, `python`
+  Name of the rtx/asdf plugin.  e.g. `golang`, `ruby`, `python`
 
 - `constraint` (string, optional)
 
-  Version constraint to pass to [`asdf latest`](https://asdf-vm.com/manage/versions.html#show-latest-stable-version).
+  Version constraint to pass to [`rtx latest`](https://github.com/jdx/rtx#tool-versions).
 
-  The latest version that begins with the given string.
+  It is most common to specify a major version or `major.minor`.
 
 - `labels` (string, optional)
 

@@ -37,14 +37,21 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
-    - name: Install asdf
-      uses: asdf-vm/actions/install@v2
+    - name: Install tools via rtx
+      uses: jdx/rtx-action@v1
+      with:
+        install: false
 
     - id: versions
       name: Get the current and latest versions of the tool
       run: |
-        CURRENT_VERSION=$(asdf current "${{ inputs.tool }}" | awk '{print $2}')
-        LATEST_VERSION=$(asdf latest "${{ inputs.tool }}" "${{ inputs.constraint }}")
+        tool="${{ inputs.tool }}"
+        constraint="${{ inputs.constraint }}"
+
+        rtx plugins install "$tool" || :
+
+        CURRENT_VERSION=$(rtx current "$tool")
+        LATEST_VERSION=$(rtx latest "$tool" ${constraint:+"${constraint}"})
 
         tee -a "$GITHUB_ENV" <<EOF
         CURRENT_VERSION=$CURRENT_VERSION
@@ -60,8 +67,7 @@ runs:
     - name: Install the latest version and update .tool-versions
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       run: |
-        asdf install "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
-        asdf local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
+        rtx local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
       shell: bash
 
     - name: Prepare information for PR
