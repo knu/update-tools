@@ -1,7 +1,7 @@
 name: "Update Tools"
 
 description: |
-  Update a version of a given tool listed in .tool-version
+  Update a version of a given tool listed in .tool-versions
 
 inputs:
   tool:

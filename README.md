@@ -1,6 +1,6 @@
 # Update Tools Action for GitHub Actions
 
-This Action updates a tool version listed in `.tool-version` at the top level of the target repository, one at a time.
+This Action updates a tool version listed in `.tool-versions` at the top level of the target repository, one at a time.
 
 It uses [asdf](https://asdf-vm.com/) to get the latest version of a specified tool, so it depends on the asdf plugin how fast the latest releases are found and available.  For example, [the ruby plugin](https://github.com/asdf-vm/asdf-ruby) requires ruby-build to be updated before it can install a new release of Ruby.
 
