@@ -37,8 +37,8 @@ runs:
   steps:
     - uses: actions/checkout@v3
 
-    - name: Install tools via rtx
-      uses: jdx/rtx-action@v1
+    - name: Install tools via mise
+      uses: jdx/mise-action@v2
       with:
         install: false
 
@@ -48,10 +48,10 @@ runs:
         tool="${{ inputs.tool }}"
         constraint="${{ inputs.constraint }}"
 
-        rtx plugins install "$tool" || :
+        mise plugins install "$tool" || :
 
-        CURRENT_VERSION=$(rtx current "$tool")
-        LATEST_VERSION=$(rtx latest "$tool" ${constraint:+"${constraint}"})
+        CURRENT_VERSION=$(mise current "$tool")
+        LATEST_VERSION=$(mise latest "$tool" ${constraint:+"${constraint}"})
 
         tee -a "$GITHUB_ENV" <<EOF
         CURRENT_VERSION=$CURRENT_VERSION
@@ -67,7 +67,7 @@ runs:
     - name: Install the latest version and update .tool-versions
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       run: |
-        rtx local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
+        mise local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
       shell: bash
 
     - name: Prepare information for PR

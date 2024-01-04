@@ -2,7 +2,7 @@
 
 This Action updates a tool version listed in `.tool-versions` at the top level of the target repository, one at a time.
 
-It uses [rtx](https://github.com/jdx/rtx) to get the latest version of a specified tool.
+It uses [mise](https://github.com/jdx/mise) to get the latest version of a specified tool.
 
 ## Usage
 
@@ -45,11 +45,11 @@ jobs:
 
 - `tool` (string, required)
 
-  Name of the rtx/asdf plugin.  e.g. `golang`, `ruby`, `python`
+  Name of the mise/asdf plugin.  e.g. `golang`, `ruby`, `python`
 
 - `constraint` (string, optional)
 
-  Version constraint to pass to [`rtx latest`](https://github.com/jdx/rtx#tool-versions).
+  [Version constraint](https://mise.jdx.dev/configuration.html#tool-versions) to pass to `mise latest`.
 
   It is most common to specify a major version or `major.minor`.
 
