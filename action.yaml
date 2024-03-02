@@ -3,23 +3,32 @@ name: "Update Tools"
 description: |
   Update a version of a given tool listed in .tool-versions
 
+branding:
+  icon: refresh-ccw
+  color: blue
+
 inputs:
   tool:
+    description: "Name of the mise/asdf plugin"
     type: string
     required: true
   constraint:
+    description: "Version constraint to pass to `mise latest`"
     type: string
     default: ""
     required: false
   labels:
+    description: "Comma separated list of labels for a created PR"
     type: string
     default: "dependencies"
     required: false
   release_url:
+    description: "URL from which the reviewer can get release information of the tool"
     type: string
     default: ""
     required: false
   token:
+    description: "GitHub access token to use for calling GitHub APIs and creating a PR"
     type: string
     required: false
     default: "${{ github.token }}"

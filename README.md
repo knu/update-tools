@@ -27,14 +27,14 @@ permissions:
 
 jobs:
   update_golang:
-    uses: knu/update_tools@v1
+    uses: knu/update-tools@v2
     with:
       tool: golang
       constraint: "1"
       release_url: https://go.dev/doc/devel/release
 
   update_buf:
-    uses: knu/update_tools@v1
+    uses: knu/update-tools@v2
     with:
       tool: buf
       constraint: "1"
