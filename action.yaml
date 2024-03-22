@@ -92,7 +92,7 @@ runs:
         EOF
       shell: bash
 
-    - uses: peter-evans/create-pull-request@v5
+    - uses: peter-evans/create-pull-request@v6
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       with:
         token: "${{ inputs.token }}"
