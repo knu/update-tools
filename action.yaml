@@ -32,6 +32,16 @@ inputs:
     type: string
     required: false
     default: "${{ github.token }}"
+  author:
+    description: "Author of the commit, in `Display Name <email@address>` format"
+    type: string
+    required: false
+    default: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+  committer:
+    description: "Committer of the commit, in `Display Name <email@address>` format"
+    type: string
+    required: false
+    default: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
 
 outputs:
   current_version:
@@ -92,10 +102,12 @@ runs:
         EOF
       shell: bash
 
-    - uses: peter-evans/create-pull-request@v6
+    - uses: peter-evans/create-pull-request@v8
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       with:
         token: "${{ inputs.token }}"
+        author: "${{ inputs.author }}"
+        committer: "${{ inputs.committer }}"
         add-paths: .tool-versions
         commit-message: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
         title: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"

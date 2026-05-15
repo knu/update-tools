@@ -71,6 +71,18 @@ jobs:
 
   Default: `${{ github.token }}`
 
+- `author` (string, optional)
+
+  Author of the commit, in `Display Name <email@address>` format.
+
+  Default: `github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>`
+
+- `committer` (string, optional)
+
+  Committer of the commit, in `Display Name <email@address>` format.
+
+  Default: `github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>`
+
 ## Outputs
 
 - `current_version`
