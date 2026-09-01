@@ -7,11 +7,16 @@ on:
 
 permissions: {}
 
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
 jobs:
   update-v2:
+    name: Fast-forward v2
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: write  # update the v2 branch ref via the Git refs API
 
     steps:
       - name: Harden Runner
