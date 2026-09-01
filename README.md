@@ -83,6 +83,12 @@ jobs:
 
   Default: `github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>`
 
+- `minimum_release_age` (string, optional)
+
+  Only consider releases older than this threshold, e.g. `7d`.  It applies both to the tool version resolved by `mise latest` (via [`MISE_MINIMUM_RELEASE_AGE`](https://mise.jdx.dev/configuration/settings.html#minimum_release_age)) and to the mise release installed by [jdx/mise-action](https://github.com/jdx/mise-action); accepts relative durations (`24h`, `7d`, `6mo`, `1y`) and absolute ISO dates or timestamps.  Set it to `0h` to always use the latest stable releases.
+
+  Default: `24h`
+
 ## Outputs
 
 - `current_version`

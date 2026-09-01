@@ -42,6 +42,11 @@ inputs:
     type: string
     required: false
     default: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
+  minimum_release_age:
+    description: "Only consider tool and mise releases older than this threshold, e.g. `7d` (passed to mise as MISE_MINIMUM_RELEASE_AGE and to jdx/mise-action)"
+    type: string
+    default: "24h"
+    required: false
 
 outputs:
   current_version:
@@ -57,20 +62,26 @@ runs:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
 
     - name: Install tools via mise
-      uses: jdx/mise-action@3c2e0cf82a5b2e5249f0d3635a4d83d0ae861518  # v4.2.5
+      uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c  # v4.3.0
       with:
         install: false
+        minimum_release_age: "${{ inputs.minimum_release_age }}"
 
     - id: versions
       name: Get the current and latest versions of the tool
+      env:
+        TOOL: ${{ inputs.tool }}
+        CONSTRAINT: ${{ inputs.constraint }}
+        MINIMUM_RELEASE_AGE: ${{ inputs.minimum_release_age }}
       run: |
-        tool="${{ inputs.tool }}"
-        constraint="${{ inputs.constraint }}"
+        if [ -n "$MINIMUM_RELEASE_AGE" ]; then
+          export MISE_MINIMUM_RELEASE_AGE="$MINIMUM_RELEASE_AGE"
+        fi
 
-        mise plugins install "$tool" || :
+        mise plugins install "$TOOL" || :
 
-        CURRENT_VERSION=$(mise current "$tool")
-        LATEST_VERSION=$(mise latest "$tool" ${constraint:+"${constraint}"})
+        CURRENT_VERSION=$(mise current "$TOOL")
+        LATEST_VERSION=$(mise latest "$TOOL" ${CONSTRAINT:+"${CONSTRAINT}"})
 
         tee -a "$GITHUB_ENV" <<EOF
         CURRENT_VERSION=$CURRENT_VERSION
