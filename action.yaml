@@ -10,41 +10,33 @@ branding:
 inputs:
   tool:
     description: "Name of the mise/asdf plugin"
-    type: string
     required: true
   constraint:
     description: "Version constraint to pass to `mise latest`"
-    type: string
     default: ""
     required: false
   labels:
     description: "Comma separated list of labels for a created PR"
-    type: string
     default: "dependencies"
     required: false
   release_url:
     description: "URL from which the reviewer can get release information of the tool"
-    type: string
     default: ""
     required: false
   token:
     description: "GitHub access token to use for calling GitHub APIs and creating a PR"
-    type: string
     required: false
     default: "${{ github.token }}"
   author:
     description: "Author of the commit, in `Display Name <email@address>` format"
-    type: string
     required: false
     default: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
   committer:
     description: "Committer of the commit, in `Display Name <email@address>` format"
-    type: string
     required: false
     default: "github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>"
   minimum_release_age:
     description: "Only consider tool and mise releases older than this threshold, e.g. `7d` (passed to mise as MISE_MINIMUM_RELEASE_AGE and to jdx/mise-action)"
-    type: string
     default: "24h"
     required: false
 
@@ -86,6 +78,14 @@ runs:
         CURRENT_VERSION=$(mise current "$TOOL")
         LATEST_VERSION=$(mise latest "$TOOL" ${CONSTRAINT:+"${CONSTRAINT}"})
 
+        # Guard $GITHUB_ENV/$GITHUB_OUTPUT against newline injection
+        for version in "$CURRENT_VERSION" "$LATEST_VERSION"; do
+          if [[ ! $version =~ ^[A-Za-z0-9._+\ -]*$ ]]; then
+            printf 'invalid version string: %q\n' "$version" >&2
+            exit 1
+          fi
+        done
+
         tee -a "$GITHUB_ENV" <<EOF
         CURRENT_VERSION=$CURRENT_VERSION
         LATEST_VERSION=$LATEST_VERSION
@@ -109,14 +109,17 @@ runs:
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       env:
         TOOL: ${{ inputs.tool }}
+        CONSTRAINT: ${{ inputs.constraint }}
         RELEASE_URL: ${{ inputs.release_url }}
       run: |
         if [ -z "$RELEASE_URL" ]; then
           q="\"$TOOL $LATEST_VERSION\" release"
           RELEASE_URL="https://www.google.com/search?q=$(jq -rn --arg q "$q" '$q|@uri')"
         fi
+        BRANCH="update_tools/$TOOL${CONSTRAINT:+/$CONSTRAINT}"
         tee -a "$GITHUB_ENV" <<EOF
         RELEASE_URL=$RELEASE_URL
+        BRANCH=$BRANCH
         EOF
       shell: bash
 
@@ -133,6 +136,6 @@ runs:
           Updates ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}.
 
           ${{ env.RELEASE_URL }}
-        branch: "update_tools/${{ inputs.tool }}/${{ inputs.constraint }}"
+        branch: "${{ env.BRANCH }}"
         delete-branch: true
         labels: "${{ inputs.labels }}"
