@@ -96,16 +96,20 @@ runs:
 
     - name: Install the latest version and update .tool-versions
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      env:
+        TOOL: ${{ inputs.tool }}
       run: |
-        mise local "${{ inputs.tool }}" "${{ env.LATEST_VERSION }}"
+        mise local "$TOOL" "$LATEST_VERSION"
       shell: bash
 
     - name: Prepare information for PR
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      env:
+        TOOL: ${{ inputs.tool }}
+        RELEASE_URL: ${{ inputs.release_url }}
       run: |
-        RELEASE_URL="${{ inputs.release_url }}"
         if [ -z "$RELEASE_URL" ]; then
-          q="\"${{ inputs.tool }} ${{ env.LATEST_VERSION }}\" release"
+          q="\"$TOOL $LATEST_VERSION\" release"
           RELEASE_URL="https://www.google.com/search?q=$(jq -rn --arg q "$q" '$q|@uri')"
         fi
         tee -a "$GITHUB_ENV" <<EOF
