@@ -27,18 +27,22 @@ permissions:
 
 jobs:
   update_golang:
-    uses: knu/update-tools@v2
-    with:
-      tool: golang
-      constraint: "1"
-      release_url: https://go.dev/doc/devel/release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: knu/update-tools@v2
+        with:
+          tool: golang
+          constraint: "1"
+          release_url: https://go.dev/doc/devel/release
 
   update_buf:
-    uses: knu/update-tools@v2
-    with:
-      tool: buf
-      constraint: "1"
-      release_url: https://github.com/bufbuild/buf/releases
+    runs-on: ubuntu-latest
+    steps:
+      - uses: knu/update-tools@v2
+        with:
+          tool: buf
+          constraint: "1"
+          release_url: https://github.com/bufbuild/buf/releases
 ```
 
 ### Inputs
