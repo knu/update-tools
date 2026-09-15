@@ -1,8 +1,8 @@
 # Update Tools Action for GitHub Actions
 
-This Action updates a tool version listed in `.tool-versions` at the top level of the target repository, one at a time.
+This Action updates a tool version listed in a [mise](https://github.com/jdx/mise) config file (`mise.toml`, `.mise.toml`, `.config/mise.toml`, `.config/mise/config.toml`, `mise/config.toml`, etc.) or `.tool-versions` at the top level of the target repository, one at a time.
 
-It uses [mise](https://github.com/jdx/mise) to get the latest version of a specified tool.
+It uses mise to get the latest version of a specified tool and `mise use` to write it back, so the file to update is chosen by [mise's rules](https://mise.jdx.dev/configuration.html#target-file-for-write-operations): the lowest-precedence config file it recognizes, preferring a TOML config over `.tool-versions`.  Files modified by mise, including `mise.lock` if any, are committed to the PR.
 
 ## Usage
 
@@ -17,6 +17,8 @@ on:
     branches:
       - main
     paths:
+      - "mise.toml"
+      - ".mise.toml"
       - ".tool-versions"
 
 name: "Update Tools"

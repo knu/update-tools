@@ -1,7 +1,7 @@
 name: "Update Tools"
 
 description: |
-  Update a version of a given tool listed in .tool-versions
+  Update a version of a given tool listed in a mise config file or .tool-versions
 
 branding:
   icon: refresh-ccw
@@ -97,12 +97,28 @@ runs:
         EOF
       shell: bash
 
-    - name: Install the latest version and update .tool-versions
+    - name: Install the latest version and update the config file
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       env:
         TOOL: ${{ inputs.tool }}
       run: |
-        mise local "$TOOL" "$LATEST_VERSION"
+        # mise picks the config file at the top level from the ones it
+        # recognizes (mise.toml, .mise.toml, .config/mise.toml, etc.),
+        # falling back to .tool-versions
+        mise use --path . "$TOOL@$LATEST_VERSION"
+
+        # Commit only what mise modified, e.g. the config file and mise.lock
+        CHANGED_FILES=$(git status --porcelain --untracked-files=all | cut -c4-)
+        if [ -z "$CHANGED_FILES" ]; then
+          echo 'mise did not modify any file' >&2
+          exit 1
+        fi
+
+        tee -a "$GITHUB_ENV" <<EOF
+        CHANGED_FILES<<CHANGED_FILES_EOF
+        $CHANGED_FILES
+        CHANGED_FILES_EOF
+        EOF
       shell: bash
 
     - name: Prepare information for PR
@@ -129,7 +145,7 @@ runs:
         token: "${{ inputs.token }}"
         author: "${{ inputs.author }}"
         committer: "${{ inputs.committer }}"
-        add-paths: .tool-versions
+        add-paths: "${{ env.CHANGED_FILES }}"
         commit-message: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
         title: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
         body: |
