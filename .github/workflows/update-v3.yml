@@ -1,0 +1,37 @@
+name: Update v3 branch
+
+on:
+  push:
+    branches:
+      - main
+
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  update-v3:
+    name: Fast-forward v3
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # create or update the v3 branch ref via the Git refs API
+
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c  # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Fast-forward v3 to main
+        env:
+          GH_TOKEN: ${{ github.token }}
+          BRANCH: v3
+        run: |
+          set -euo pipefail
+          if gh api "/repos/$GITHUB_REPOSITORY/git/ref/heads/$BRANCH" >/dev/null 2>&1; then
+            gh api -X PATCH "/repos/$GITHUB_REPOSITORY/git/refs/heads/$BRANCH" -f sha="$GITHUB_SHA"
+          else
+            gh api -X POST "/repos/$GITHUB_REPOSITORY/git/refs" -f ref="refs/heads/$BRANCH" -f sha="$GITHUB_SHA"
+          fi

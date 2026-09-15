@@ -31,7 +31,7 @@ jobs:
   update_golang:
     runs-on: ubuntu-latest
     steps:
-      - uses: knu/update-tools@v2
+      - uses: knu/update-tools@v3
         with:
           tool: golang
           constraint: "1"
@@ -40,7 +40,7 @@ jobs:
   update_buf:
     runs-on: ubuntu-latest
     steps:
-      - uses: knu/update-tools@v2
+      - uses: knu/update-tools@v3
         with:
           tool: buf
           constraint: "1"
@@ -49,7 +49,7 @@ jobs:
   update_node_in_frontend:
     runs-on: ubuntu-latest
     steps:
-      - uses: knu/update-tools@v2
+      - uses: knu/update-tools@v3
         with:
           tool: node
           constraint: "24"
