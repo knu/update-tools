@@ -1,6 +1,6 @@
 # Update Tools Action for GitHub Actions
 
-This Action updates a tool version listed in a [mise](https://github.com/jdx/mise) config file (`mise.toml`, `.mise.toml`, `.config/mise.toml`, `.config/mise/config.toml`, `mise/config.toml`, etc.) or `.tool-versions` at the top level of the target repository, one at a time.
+This Action updates a tool version listed in a [mise](https://github.com/jdx/mise) config file (`mise.toml`, `.mise.toml`, `.config/mise.toml`, `.config/mise/config.toml`, `mise/config.toml`, etc.) or `.tool-versions` in the target repository, one at a time.  The file is looked up at the top level by default, or in the directory given by the `directory` input.
 
 It uses mise to get the latest version of a specified tool and `mise use` to write it back, so the file to update is chosen by [mise's rules](https://mise.jdx.dev/configuration.html#target-file-for-write-operations): the lowest-precedence config file it recognizes, preferring a TOML config over `.tool-versions`.  Files modified by mise, including `mise.lock` if any, are committed to the PR.
 
@@ -17,9 +17,9 @@ on:
     branches:
       - main
     paths:
-      - "mise.toml"
-      - ".mise.toml"
-      - ".tool-versions"
+      - "**/mise.toml"
+      - "**/.mise.toml"
+      - "**/.tool-versions"
 
 name: "Update Tools"
 
@@ -45,6 +45,16 @@ jobs:
           tool: buf
           constraint: "1"
           release_url: https://github.com/bufbuild/buf/releases
+
+  update_node_in_frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: knu/update-tools@v2
+        with:
+          tool: node
+          constraint: "24"
+          directory: frontend
+          release_url: https://nodejs.org/en/about/previous-releases
 ```
 
 ### Inputs
@@ -58,6 +68,12 @@ jobs:
   [Version constraint](https://mise.jdx.dev/configuration.html#tool-versions) to pass to `mise latest`.
 
   It is most common to specify a major version or `major.minor`.
+
+- `directory` (string, optional)
+
+  Directory containing the config file to update, relative to the repository root.  Useful for monorepos with per-package tool versions.  The directory name is included in the PR title and branch name so that jobs for different directories do not collide.
+
+  Default: `.` (the repository root)
 
 - `labels` (string, optional)
 

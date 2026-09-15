@@ -15,6 +15,10 @@ inputs:
     description: "Version constraint to pass to `mise latest`"
     default: ""
     required: false
+  directory:
+    description: "Directory containing the config file to update, relative to the repository root"
+    default: "."
+    required: false
   labels:
     description: "Comma separated list of labels for a created PR"
     default: "dependencies"
@@ -64,6 +68,7 @@ runs:
 
     - id: versions
       name: Get the current and latest versions of the tool
+      working-directory: ${{ inputs.directory }}
       env:
         TOOL: ${{ inputs.tool }}
         CONSTRAINT: ${{ inputs.constraint }}
@@ -99,15 +104,17 @@ runs:
 
     - name: Install the latest version and update the config file
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
+      working-directory: ${{ inputs.directory }}
       env:
         TOOL: ${{ inputs.tool }}
       run: |
-        # mise picks the config file at the top level from the ones it
+        # mise picks the config file in this directory from the ones it
         # recognizes (mise.toml, .mise.toml, .config/mise.toml, etc.),
         # falling back to .tool-versions
         mise use --path . "$TOOL@$LATEST_VERSION"
 
-        # Commit only what mise modified, e.g. the config file and mise.lock
+        # Commit only what mise modified, e.g. the config file and mise.lock;
+        # porcelain paths are relative to the repository root
         CHANGED_FILES=$(git status --porcelain --untracked-files=all | cut -c4-)
         if [ -z "$CHANGED_FILES" ]; then
           echo 'mise did not modify any file' >&2
@@ -126,15 +133,23 @@ runs:
       env:
         TOOL: ${{ inputs.tool }}
         CONSTRAINT: ${{ inputs.constraint }}
+        DIRECTORY: ${{ inputs.directory }}
         RELEASE_URL: ${{ inputs.release_url }}
       run: |
         if [ -z "$RELEASE_URL" ]; then
           q="\"$TOOL $LATEST_VERSION\" release"
           RELEASE_URL="https://www.google.com/search?q=$(jq -rn --arg q "$q" '$q|@uri')"
         fi
-        BRANCH="update_tools/$TOOL${CONSTRAINT:+/$CONSTRAINT}"
+        # Normalize the directory so the root becomes empty and paths like
+        # ./pkg/ become pkg
+        DIRECTORY=${DIRECTORY#./}
+        DIRECTORY=${DIRECTORY%/}
+        [ "$DIRECTORY" != . ] || DIRECTORY=
+        TARGET="$TOOL${DIRECTORY:+ in $DIRECTORY}"
+        BRANCH="update_tools/${DIRECTORY:+$DIRECTORY/}$TOOL${CONSTRAINT:+/$CONSTRAINT}"
         tee -a "$GITHUB_ENV" <<EOF
         RELEASE_URL=$RELEASE_URL
+        TARGET=$TARGET
         BRANCH=$BRANCH
         EOF
       shell: bash
@@ -146,10 +161,10 @@ runs:
         author: "${{ inputs.author }}"
         committer: "${{ inputs.committer }}"
         add-paths: "${{ env.CHANGED_FILES }}"
-        commit-message: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
-        title: "Update ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
+        commit-message: "Update ${{ env.TARGET }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
+        title: "Update ${{ env.TARGET }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}"
         body: |
-          Updates ${{ inputs.tool }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}.
+          Updates ${{ env.TARGET }} from ${{ env.CURRENT_VERSION }} to ${{ env.LATEST_VERSION }}.
 
           ${{ env.RELEASE_URL }}
         branch: "${{ env.BRANCH }}"
