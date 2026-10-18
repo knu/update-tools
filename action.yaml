@@ -70,6 +70,7 @@ runs:
       name: Get the current and latest versions of the tool
       working-directory: ${{ inputs.directory }}
       env:
+        MISE_GITHUB_TOKEN: ${{ inputs.token }}
         TOOL: ${{ inputs.tool }}
         CONSTRAINT: ${{ inputs.constraint }}
         MINIMUM_RELEASE_AGE: ${{ inputs.minimum_release_age }}
@@ -106,6 +107,7 @@ runs:
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       working-directory: ${{ inputs.directory }}
       env:
+        MISE_GITHUB_TOKEN: ${{ inputs.token }}
         TOOL: ${{ inputs.tool }}
       run: |
         # mise picks the config file in this directory from the ones it
