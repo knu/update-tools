@@ -61,7 +61,7 @@ runs:
         persist-credentials: false
 
     - name: Install tools via mise
-      uses: jdx/mise-action@f5be966e4a917d54244728e6a5fdcd1d93a35e6c  # v5.2.6
+      uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785  # v5.2.8
       with:
         install: false
         minimum_release_age: "${{ inputs.minimum_release_age }}"
@@ -156,7 +156,7 @@ runs:
         EOF
       shell: bash
 
-    - uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
+    - uses: peter-evans/create-pull-request@3ffccacd46053766916f087ce41d627c0b8cf2d1  # v8.1.3
       if: ${{ env.LATEST_VERSION != env.CURRENT_VERSION }}
       with:
         token: "${{ inputs.token }}"
